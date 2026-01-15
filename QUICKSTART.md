@@ -2,6 +2,34 @@
 
 Get started with Temporal and OpenAI Agents SDK in minutes!
 
+### Option 1: Using OpenAI (Standard)
+
+1. Add to `.env` file:
+```bash
+OPENAI_API_KEY=sk-your-openai-key
+```
+
+2. Follow the standard setup instructions
+
+### Option 2: Using OpenRouter - Free Alternative 🆓
+
+OpenRouter provides access to **free AI models** like DeepSeek R1.
+
+**Complete separate implementation** - no conflicts with OpenAI setup!
+
+```bash
+# Navigate to OpenRouter folder
+cd open-router
+
+# Create .env with your free API key
+echo "OPENROUTER_API_KEY=sk-or-v1-your-key" > .env
+
+# Run the example
+python example.py
+```
+
+See the [open-router/README.md](open-router/README.md) for complete documentation.
+
 ## 1. Setup
 
 ```bash
@@ -23,12 +51,14 @@ cp .env.example .env
 
 ## 2. Start Temporal Server
 
-### Option A: Using Docker (Recommended)
+### Option A: Using Docker (Need to has preconfigured mysql, cassandra or postgres)
 ```bash
-docker run -d -p 7233:7233 -p 8233:8233 temporalio/auto-setup:latest
+docker run -d -p 7233:7233 -p 8233:8233 -e DB=cassandra temporalio/auto-setup:latest
 ```
 
-### Option B: Using Temporal CLI
+### Option B: Using Temporal CLI (Recommended)
+Temporal CLU uses SQLite as the default in-memory database for local development which is lightweight.
+
 ```bash
 # Install Temporal CLI
 brew install temporal  # macOS
@@ -88,30 +118,15 @@ Character count: 142
 Word count: 23
 ```
 
-## 4. Explore and Learn
-
-- Check out the code in `examples/` directories
-- Read the README.md in each example folder
-- Modify the examples to experiment
-- Try the Temporal Web UI at http://localhost:8233
-
-## Troubleshooting
-
-### "Connection refused" error
-- Make sure Temporal server is running
-- Check that port 7233 is not blocked
-
-### "OpenAI API key not found"
-- Make sure you've created .env file from .env.example
-- Add your OpenAI API key to the .env file
-
-### Import errors
-- Make sure you're in the virtual environment
-- Run `pip install -r requirements.txt`
-
 ## Next Steps
 
 - Read the [full README.md](README.md)
 - Check out [Temporal documentation](https://docs.temporal.io/)
 - Explore [OpenAI API documentation](https://platform.openai.com/docs/)
 - Add your own examples!
+
+## Documentation
+
+- [OpenRouter Integration Guide](docs/open-router-usage.md) - Use free AI models
+- [API Documentation](docs/API.md)
+- [Examples](examples/)
