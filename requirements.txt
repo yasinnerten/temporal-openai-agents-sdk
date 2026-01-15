@@ -1,0 +1,8 @@
+# Temporal dependencies
+temporalio>=1.5.1
+
+# OpenAI dependencies
+openai>=1.12.0
+
+# Additional utilities
+python-dotenv>=1.0.0
