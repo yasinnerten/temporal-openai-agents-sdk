@@ -14,43 +14,46 @@ This repository contains examples and experiments combining:
 - A running Temporal server (local or cloud)
 - OpenAI API key
 
-## Installation
+## Quick Start
 
-1. Clone the repository:
-```bash
+
+# 1. Clone and setup
 git clone https://github.com/yasinnerten/temporal-openai-agents-sdk.git
 cd temporal-openai-agents-sdk
-```
+python -m venv venv && source venv/bin/activate
 
-2. Create and activate a virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-3. Install dependencies:
-```bash
+# 2. Install and configure
 pip install -r requirements.txt
 ```
-
-4. Set up environment variables:
-```bash
-cp .env.example .env
+cp .env.example .env && vim .env
 # Edit .env and add your OpenAI API key and Temporal connection details
+# Or using make
+make install
+```
+# 3. Start Temporal server
+temporal server start-dev
+
+# 4. Run an example (in new terminal)
+python examples/integration/run_workflow.py
 ```
 
 ## Running Temporal Server Locally
 
 If you don't have Temporal running, you can start it locally using Docker:
+But then you need to set a database, since container doesn't have option for sql-lite
 
 ```bash
-docker run -d -p 7233:7233 temporalio/auto-setup:latest
+# docker run -d -p 7233:7233 DB=cassandra temporalio/auto-setup:latest
+```
+or 
+```bash
+# docker compose up -d
 ```
 
-Or use the Temporal CLI:
-```bash
-temporal server start-dev
-```
+# 5. Cleanup and environment check
+make check             # Verify environment setup
+make test              # Run test suite
+make clean             # Remove cache and build files
 
 ## Project Structure
 
@@ -60,7 +63,12 @@ temporal-openai-agents-sdk/
 │   ├── temporal/           # Basic Temporal workflow examples
 │   ├── openai/             # OpenAI SDK examples
 │   └── integration/        # Combined Temporal + OpenAI examples
+├── open-router/            # OpenRouter integration (free models)
+├── tests/                  # Test suite
+├── Makefile               # Build automation
 ├── requirements.txt        # Project dependencies
+├── pyproject.toml         # Project configuration
+├── check_setup.py         # Verify environment setup
 ├── pyproject.toml         # Project configuration
 └── README.md              # This file
 ```
@@ -93,6 +101,40 @@ python examples/integration/worker.py
 python examples/integration/run_workflow.py
 ```
 
+## Extending the SDK
+
+### Creating Custom Workflows
+
+1. **Define workflow logic** in `examples/integration/`:
+   - Inherit from Temporal's `WorkflowBase`
+   - Use `@workflow.run` decorator for workflow methods
+   - Define activities for long-running tasks
+
+2. **Integrate OpenAI Agents**:
+   - Create activity methods that call OpenAI Agents SDK
+   - Handle tool calls and agent responses asynchronously
+   - Chain multiple agent calls within workflow logic
+
+3. **Add custom activities**:
+   ```python
+   @activity.defn
+   async def my_custom_activity(input_data: str) -> str:
+       # Your implementation here
+       return result
+   ```
+
+### Building Your Own Agents
+
+- Extend the examples in `examples/openai/` with custom tools
+- Use Temporal workflows to orchestrate multi-step agent tasks
+- Combine with other APIs and data sources
+
+### Testing Locally
+
+- Use Temporal's local development server
+- Mock OpenAI responses for unit tests
+- Test workflow logic with different scenarios
+
 ## Learning Resources
 
 ### Temporal
@@ -107,7 +149,9 @@ python examples/integration/run_workflow.py
 
 ## Contributing
 
-Feel free to add your own examples and experiments!
+Feel free to add your own examples and experiments! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+This repo created with help from copilot-swe-agent and Claude Haiku 3.5.
 
 ## License
 
