@@ -5,8 +5,16 @@ These tests demonstrate how to test Temporal workflows.
 """
 
 import pytest
-from examples.temporal.workflows import GreetingWorkflow, create_greeting
-from temporalio.testing import WorkflowEnvironment
+
+# Import Worker at the top, with graceful handling if not installed
+try:
+    from temporalio.worker import Worker
+    from temporalio.testing import WorkflowEnvironment
+    from examples.temporal.workflows import GreetingWorkflow, create_greeting
+    TEMPORALIO_AVAILABLE = True
+except ImportError:
+    TEMPORALIO_AVAILABLE = False
+    pytest.skip("temporalio not installed", allow_module_level=True)
 
 
 @pytest.mark.asyncio
@@ -33,11 +41,3 @@ async def test_greeting_workflow():
                 task_queue="test-task-queue",
             )
             assert result == "Hello, Tester!"
-
-
-# Note: Import Worker here to avoid issues if temporalio is not installed
-try:
-    from temporalio.worker import Worker
-except ImportError:
-    Worker = None
-    pytest.skip("temporalio not installed", allow_module_level=True)
