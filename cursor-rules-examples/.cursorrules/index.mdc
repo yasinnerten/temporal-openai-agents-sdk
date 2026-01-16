@@ -1,0 +1,461 @@
+# Cursor Rules Examples
+
+This directory contains example cursor rules that can be used with OpenCode or Cursor IDE to guide AI behavior in coding projects.
+
+## How Cursor Rules Work
+
+Cursor rules are persistent instructions injected at the prompt level to guide AI assistants. They use a specific format:
+
+- **Format**: Markdown files with YAML frontmatter
+- **Metadata**: `glob` patterns for file matching, `alwaysApply` for when rules trigger, `priority` levels
+- **Structure**: Organized by type (language, framework, testing, etc.)
+
+---
+
+## File Structure
+
+```
+cursor-rules-examples/
+├── .cursorrules/           # Main rules directory
+│   ├── index.mdc            # Project overview (always loaded)
+│   ├── typescript.mdc        # TypeScript-specific rules
+│   ├── react.mdc             # React framework rules
+│   ├── testing.mdc            # Testing guidelines
+│   └── security.mdc           # Security best practices
+├── README.md                # This file
+└── .cursorrules             # Deprecated single file format (still works)
+```
+
+---
+
+## Example 1: TypeScript Rules
+
+**File**: `.cursorrules/typescript.mdc`
+
+```yaml
+---
+globs:
+  - "**/*.ts"
+  - "**/*.tsx"
+alwaysApply: true
+priority: high
+---
+
+# TypeScript Coding Standards
+
+## Naming Conventions
+- Use PascalCase for classes and interfaces
+- Use camelCase for functions and variables
+- Use kebab-case for file names
+- Constants should be UPPER_SNAKE_CASE
+- Type definitions should use the `I` prefix (e.g., `IUserService`, not `UserService`)
+
+## Code Organization
+- One file per logical module/component
+- Export types from `index.ts` in each directory
+- Keep barrel files short and focused
+- Use `export type` for shared types instead of interfaces when possible
+
+## Type Safety
+- Always use strict mode in tsconfig.json
+- Avoid `any` types unless absolutely necessary
+- Use `unknown` instead of `any` for truly dynamic types
+- Prefer explicit return types over implicit any
+
+## Async/Await
+- Always await async calls
+- Use `Promise.allSettled` for parallel independent async operations
+- Avoid mixing async/await patterns with callbacks
+- Use `try/catch` blocks for error handling, not `.catch()`
+
+## Import Style
+- Prefer named imports over barrel exports when specific functions are needed
+- Group related imports together
+- Order imports: external dependencies first, then internal modules
+- Use path aliases in tsconfig for clean imports
+
+## Error Handling
+- Use proper TypeScript error types, not `any` or `unknown`
+- Create custom error classes extending `Error` for domain-specific errors
+- Always throw errors with meaningful messages
+- Log errors with context before throwing
+
+## Code Style
+- Use arrow functions for simple transforms and immutable operations
+- Use template literals for multi-line strings
+- Prefer `const` and `let` over `var`
+- Use optional chaining (`?.`) over explicit null checks
+- Destructure only when it improves readability
+```
+
+---
+
+## Example 2: React Rules
+
+**File**: `.cursorrules/react.mdc`
+
+```yaml
+---
+globs:
+  - "**/components/**/*.tsx"
+  - "**/pages/**/*.tsx"
+alwaysApply: false
+---
+
+# React Component Guidelines
+
+## Component Structure
+```tsx
+// Bad example
+const Component = () => {
+  return <div>Hello {name}</div>
+}
+
+// Good example
+const Component: React.FC<{ name: string }> = ({ name }) => {
+  return <div>Hello {name}</div>
+}
+```
+
+## Best Practices
+- Define component interfaces explicitly above the component
+- Use functional components with `React.FC` type
+- Keep components small and focused (single responsibility)
+- Use TypeScript for prop types and state
+- Extract repeated logic into custom hooks
+- Use memoization (`React.memo`) for expensive computations
+
+## Hooks Usage
+- Always include dependencies array in custom hooks
+- Use `useCallback` for functions passed to child components to prevent unnecessary re-renders
+- Use `useMemo` for expensive calculations
+- Custom hooks should follow naming pattern `use<X>`
+
+## State Management
+- Prefer local state for component-specific data
+- Lift state up only when multiple components need it
+- Use context providers for shared state across components
+- Consider using Zustand, Jotai, or Redux for complex global state
+
+## Styling
+- Use CSS modules or styled-components over global CSS
+- Tailwind CSS utility classes should follow logical grouping
+- Avoid inline styles unless absolutely necessary
+- Use theme tokens for consistent theming
+
+## Performance
+- Implement lazy loading for routes and heavy components
+- Use `React.lazy()` for code splitting
+- Optimize re-renders with `key` props
+- Avoid expensive calculations in render methods
+```
+
+---
+
+## Example 3: Testing Rules
+
+**File**: `.cursorrules/testing.mdc`
+
+```yaml
+---
+globs:
+  - "**/*.test.ts"
+  - "**/*.test.tsx"
+  - "**/tests/**/*.ts"
+alwaysApply: false
+---
+
+# Testing Guidelines
+
+## Test Organization
+- Group tests by feature or module
+- Name test files `<ComponentName>.test.ts` or `<ComponentName>.test.tsx`
+- Mirror the source file structure in test directory
+- Place test files alongside source files, not in separate folders
+
+## Test Writing Best Practices
+- Follow the AAA pattern: Arrange (Arrange), Act, Assert, Annihilate, Repeat
+- Write descriptive test names: `shouldThrowErrorWhenUserIdIsInvalid` vs `test1`
+- Use `describe` blocks to explain what and why tests exist
+- Test normal path first, then edge cases and error conditions
+- One assertion per test unless testing multiple related behaviors
+
+## What to Test
+- Unit tests for pure functions
+- Integration tests for component interactions
+- Snapshot tests for React components
+- API mock tests for external service calls
+- Performance tests for critical code paths
+
+## Test Naming Conventions
+```typescript
+// Good
+describe('UserService.login()', () => {
+  it('should authenticate with valid credentials', async () => {
+    // test code
+  });
+
+  it('should throw error with invalid credentials', async () => {
+    // test code
+  });
+});
+
+// Bad
+test('login', () => {
+  // What does this test?
+});
+```
+
+## Testing External Dependencies
+```typescript
+// Mock file structure
+// __mocks__/userService.mock.ts
+export const mockUserService = {
+  login: jest.fn(),
+  getUser: jest.fn(),
+};
+
+// Test file
+import { mockUserService } from './__mocks__/userService.mock';
+```
+
+## Running Tests
+```bash
+# Run all tests
+npm test
+
+# Run specific test file
+npm test UserService.test.ts
+
+# Run tests matching pattern
+npm test -- --testNamePattern="AuthService"
+
+# Run tests in watch mode
+npm test -- --watch
+
+# Run with coverage
+npm test -- --coverage
+```
+
+---
+
+## Example 4: Security Rules
+
+**File**: `.cursorrules/security.mdc`
+
+```yaml
+---
+globs:
+  - "**/api/**/*.ts"
+  - "**/auth/**/*.ts"
+  - "**/services/**/*.ts"
+alwaysApply: true
+priority: high
+---
+
+# Security Best Practices
+
+## Authentication & Authorization
+- Never hardcode API keys, tokens, or secrets
+- Use environment variables for all sensitive configuration
+- Implement proper token refresh mechanisms
+- Always validate tokens server-side
+- Use HTTPS for all API communication
+- Implement logout and token revocation
+
+## Input Validation
+- Validate all user inputs (forms, API endpoints, etc.)
+- Sanitize inputs to prevent XSS and injection attacks
+- Use parameterized queries to prevent SQL injection
+- Validate file types and sizes before upload
+- Use TypeScript for compile-time type checking
+
+## Data Protection
+- Hash sensitive data before storing (bcrypt for passwords)
+- Use environment-specific encryption keys
+- Never log sensitive user data (PII)
+- Implement data retention policies
+- Provide user control over data deletion and export
+
+## API Security
+- Implement rate limiting per user/IP
+- Use CORS properly (restrict origins, not allow all)
+- Implement proper authentication middleware
+- Use CSRF tokens for state-changing operations
+- Validate all API responses before processing
+- Keep API versioning and deprecation policies
+
+## Third-Party Dependencies
+- Keep dependencies up-to-date
+- Use `npm audit` regularly
+- Review security advisories for dependencies
+- Pin specific versions if they address known vulnerabilities
+- Use dependency scanning tools (Snyk, Dependabot)
+```
+
+---
+
+## Example 5: Project Overview
+
+**File**: `.cursorrules/index.mdc`
+
+```yaml
+---
+alwaysApply: true
+priority: low
+description: |
+  This project contains Temporal workflow orchestration examples
+  combined with OpenAI Agents SDK demonstrations.
+
+  Key technologies:
+  - Temporal (workflow orchestration)
+  - OpenAI (AI agents and chat completions)
+  - Python 3.8+
+  - pytest for testing
+
+  Project structure:
+  - examples/temporal/ - Basic Temporal workflows
+  - examples/openai/ - OpenAI SDK examples
+  - examples/integration/ - Combined Temporal + OpenAI workflows
+
+  Development guidelines:
+  - Follow PEP 8 for Python code
+  - Add type hints where appropriate
+  - Include docstrings for functions and classes
+  - Use environment variables for sensitive data
+  - Write tests for new functionality
+  - Follow existing code style patterns
+```
+
+---
+
+## Example 6: Legacy Single File Format
+
+**File**: `.cursorrules`
+
+```markdown
+# Cursor Rules for Temporal OpenAI Agents SDK
+
+## Overview
+This repository demonstrates workflow orchestration using Temporal and OpenAI integration.
+
+## Technology Stack
+- **Temporal**: Durable workflow orchestration platform
+- **OpenAI**: AI agents and chat completion API
+- **Python**: Programming language
+- **pytest**: Testing framework
+
+## Development Guidelines
+
+### Code Style
+- Follow PEP 8 style guidelines
+- Use type hints for better IDE support
+- Write descriptive docstrings
+- Keep functions focused and single-purpose
+- Use async/await patterns properly
+
+### Project Structure
+```
+examples/
+├── temporal/          # Basic Temporal workflow examples
+│   ├── worker.py
+│   ├── workflows.py
+│   └── run_workflow.py
+├── openai/            # OpenAI SDK examples
+│   ├── basic_agent.py
+│   └── function_calling.py
+└── integration/         # Combined Temporal + OpenAI workflows
+    ├── worker.py
+    ├── workflows.py
+    └── run_workflow.py
+```
+
+### Activity Design
+- Activities should be idempotent and handle retries gracefully
+- Use appropriate timeout values for long-running AI operations
+- Log activity start and completion for debugging
+- Validate OpenAI API responses before processing
+
+### Testing
+- Write tests for new activities and workflows
+- Mock OpenAI API responses for unit tests
+- Test error handling and retry logic
+- Validate workflow execution paths
+
+### Environment Configuration
+- Use .env files for local development
+- Never commit .env files
+- Provide .env.example with required keys documented
+- Support multiple environment configurations (dev, staging, production)
+
+### Documentation
+- Update README.md for new features or examples
+- Add inline code comments for complex logic
+- Include usage examples in function/class docstrings
+```
+
+---
+
+## How to Use These Rules
+
+### With OpenCode
+1. Copy the `.cursorrules/` directory to your project root
+2. OpenCode will automatically detect and load these rules
+3. The rules will be applied to all AI interactions in that project
+
+### With Cursor
+1. Copy the `.cursorrules/` directory to your project root
+2. Restart Cursor to reload the rules
+3. The rules will be applied to all AI interactions in that project
+
+### Customizing Rules
+To customize rules for your project:
+1. Edit the `.mdc` files in `.cursorrules/` directory
+2. Modify YAML frontmatter to change globs, priority, or alwaysApply settings
+3. Add new rule files as needed
+4. Use `globs` patterns to target specific file types or directories
+5. Set `alwaysApply: true` for rules that should always be enforced
+6. Use `alwaysApply: false` for conditional rules (e.g., security checks on API files only)
+```
+
+---
+
+## Additional Resources
+
+- [OpenCode Documentation](https://opencode.ai/docs/)
+- [OpenCode Ecosystem](https://opencode.ai/docs/ecosystem/)
+- [OpenCode Plugins](https://opencode.ai/docs/plugins/)
+- [Temporal Documentation](https://docs.temporal.io/)
+- [OpenAI Documentation](https://platform.openai.com/docs/)
+
+---
+
+## Quick Reference: YAML Frontmatter Cheatsheet
+
+```yaml
+---
+# Always apply these rules
+alwaysApply: true
+
+# Only apply to these files
+globs:
+  - "**/api/**/*.ts"
+
+# Only apply when specific conditions are met
+globs:
+  - "**/legacy/**/*.ts"
+```
+
+```yaml
+---
+# High priority rules
+priority: high
+
+# Lower priority rules
+priority: low
+
+# Description of this rule
+description: |
+  These are TypeScript coding standards for the project.
+  Focus on type safety and clean code patterns.
+```

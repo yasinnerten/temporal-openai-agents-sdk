@@ -67,7 +67,6 @@ temporal-openai-agents-sdk/
 ├── tests/                  # Test suite
 ├── Makefile               # Build automation
 ├── requirements.txt        # Project dependencies
-├── pyproject.toml         # Project configuration
 ├── check_setup.py         # Verify environment setup
 ├── pyproject.toml         # Project configuration
 └── README.md              # This file
@@ -99,6 +98,12 @@ python examples/integration/worker.py
 
 # Run the integrated workflow
 python examples/integration/run_workflow.py
+
+# Start the worker for multi-step AI chain
+python examples/integration/multi_step_chain_worker.py
+
+# Run the multi-step AI chain workflow (generation → analysis → summary → extraction)
+python examples/integration/run_multi_step_chain.py
 ```
 
 ## Extending the SDK
